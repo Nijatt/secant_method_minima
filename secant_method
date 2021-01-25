@@ -1,0 +1,76 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+##=========Important functions to develop secant method
+def function(x):
+    ''' function given in the problem x**2+x+10 '''
+    return x**2+x+10
+
+def analytical_first_order_der_f(x):
+    return 2*x+1
+
+def derivation(f,x,tolerance=0.00001):
+    return float( f(x+tolerance)-f(x))/tolerance
+
+def second_order_derivation(first_order,f,x,tolerance=0.00001):
+    return float(first_order(f,x+tolerance)-first_order(f,x))/tolerance
+
+def backward_diff(f,x0,x1):
+    ''' Returns backward differentiation of input function.'''
+    return float(f(x1)-f(x0))/float(x1-x0)
+
+def backward_second_diff(derivative_f,f,x0,x1,tolerance=0.00001):
+    return float(derivative_f(f,x1)-derivative_f(f,x0))/float(x1-x0)
+
+def secant_method(x_0,x_1,f,tolerance=0.00001):
+    ''' Secant method function input: inital boundary points as x_0 and x_1
+        given fucntion and tolerance for stopping iteration'''
+    while abs(f(x_1))>tolerance: # if function approximates to zero or smaller than tolerance then  breake.
+        x_2=x_1-float(f(x_1))/backward_diff(f,x_0,x_1)
+        x_0=x_1
+        x_1=x_2
+    return x_2
+
+def secant_method_for_derivattive(x_0,x_1,derivative_f,f,tolerance=0.00001):
+    ''' Secant method function input: inital boundary points as x_0 and x_1
+        given fucntion and tolerance for stopping iteration'''
+    while abs(derivative_f(f,x_1))>tolerance: # if function approximates to zero or smaller than tolerance then  breake.
+        x_2=x_1-float(derivative_f(f,x_1))/backward_second_diff(derivative_f,f,x_0,x_1)
+        x_0=x_1
+        x_1=x_2
+    return x_2
+
+
+
+x_data=np.arange(-10,10,0.01)
+y_data=function(x_data)
+y1_data=[]
+for i in x_data:
+    y1_data.append(derivation(function,i))
+
+y2_data=[]
+for j in x_data:
+    y2_data.append(second_order_derivation(derivation,function,i))
+
+y3_data=[]
+
+for k in range(len(x_data)):
+    try:
+        y3_data.append(backward_second_diff(derivation,function,x_data[k],x_data[k+1]))
+    except:
+        pass
+
+
+print(min(y_data))
+plt.plot(x_data,y_data)
+plt.plot(x_data,y1_data)
+#plt.plot(x_data,y2_data)
+plt.plot(x_data[:-1],y3_data)
+plt.show()
+
+minima=secant_method(-3,5,analytical_first_order_der_f)
+print("minima1",minima)
+print(function(minima))
+
+minima2=secant_method_for_derivattive(-3,5,derivation,function)
+print("minima2",minima2)
